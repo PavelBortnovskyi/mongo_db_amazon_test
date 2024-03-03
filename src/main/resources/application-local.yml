@@ -1,0 +1,33 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+  config:
+    activate:
+      on-profile: local
+  data:
+    mongodb:
+      authentication-database: admin
+      username: root
+      password: root
+      port: 27017
+      database: testdb
+      host: localhost
+      auto-index-creation: true
+  jackson:
+    time-zone: UTC
+jwt:
+  secret: verySecretUniqueKey
+  secretRefresh: wannaRefresh?
+  secretPasswordReset: you_forgot_it_again!
+  secretPasswordUpdate: ok_try_again!
+  secretRegister: welcomeOnBoard!
+  expiration: 7200000 #2h
+  expirationRefresh: 604800000 #7d
+  expirationPasswordReset: 86400000 #24h
+  expirationPasswordUpdate: 3600000 #1h
+  expirationRegister: 86400000 #24h
+  header: Authorization
+dbfile:
+  name: test_report.json
+  path: src/main/java/com/neo/mongocachetest/containers/db/init_data/
