@@ -70,6 +70,19 @@ public class ReportService {
         return report;
     }
 
+    public ReportDTO getAllReportsByDate() {
+        ReportDTO report = this.getReportWithHeader();
+        ReportSpecificationDTO reportSpecification = report.getReportSpecification();
+        report.setSalesAndTrafficByDate(salesAndTrafficByDateRepository.findAll()
+                .stream()
+                .map(s -> mm.map(s, SalesAndTrafficByDateDTO.class))
+                .collect(Collectors.toList()));
+        reportSpecification.setDataStartTime(report.getSalesAndTrafficByDate().get(0).getDate());
+        reportSpecification.setDataEndTime(report.getSalesAndTrafficByDate().get(report.getSalesAndTrafficByDate().size() - 1).getDate());
+        report.setReportSpecification(reportSpecification);
+        return report;
+    }
+
     public ReportDTO getReportByDate(Date date) {
         ReportDTO report = this.getReportWithHeader();
         report.getReportSpecification().setDataStartTime(date);
@@ -105,6 +118,36 @@ public class ReportService {
                 .collect(Collectors.toList()));
         return report;
     }
+
+    public ReportDTO getAllReportByAsin() {
+        ReportDTO report = this.getReportWithHeader();
+        ReportSpecificationDTO reportSpecification = report.getReportSpecification();
+        report.setSalesAndTrafficByAsin(salesAndTrafficByAsinRepository.findAll()
+                .stream()
+                .map(s -> mm.map(s, SalesAndTrafficByAsinDTO.class))
+                .collect(Collectors.toList()));
+        report.setReportSpecification(reportSpecification);
+        return report;
+    }
+
+    public ReportDTO getReportByAsin(String ASIN) {
+        ReportDTO report = this.getReportWithHeader();
+        report.setSalesAndTrafficByAsin(new ArrayList<>() {{
+            add(salesAndTrafficByAsinRepository.findByParentAsin(ASIN)
+                    .map(d -> mm.map(d, SalesAndTrafficByAsinDTO.class))
+                    .orElse(null));
+        }});
+        return report;
+    }
+
+    public ReportDTO getReportByAsinList(List<String> ASINs) {
+        ReportDTO report = this.getReportWithHeader();
+        report.setSalesAndTrafficByAsin(salesAndTrafficByAsinRepository.findByParentAsinIn(ASINs)
+                .stream().map(d -> mm.map(d, SalesAndTrafficByAsinDTO.class)).collect(Collectors.toList()));
+        return report;
+    }
+
+
 
 
     public void saveReport(Report report) {
