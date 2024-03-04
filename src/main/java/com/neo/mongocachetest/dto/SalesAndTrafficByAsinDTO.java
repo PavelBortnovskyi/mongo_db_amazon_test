@@ -1,6 +1,8 @@
-package com.neo.mongocachetest.model;
+package com.neo.mongocachetest.dto;
 
 import com.neo.mongocachetest.annotation.CascadeSave;
+import com.neo.mongocachetest.model.SaleByAsin;
+import com.neo.mongocachetest.model.TrafficByAsin;
 import lombok.Data;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -8,17 +10,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 
 @Data
-@Document
-public class SalesAndTrafficByAsin extends BaseDocument{
+public class SalesAndTrafficByAsinDTO {
 
-    @Indexed(unique = true)
     public String parentAsin;
 
-    @DBRef
-    @CascadeSave
-    public SaleByAsin salesByAsin;
+    public SaleByAsinDTO salesByAsin;
 
-    @DBRef
-    @CascadeSave
-    public TrafficByAsin trafficByAsin;
+    public TrafficByAsinDTO trafficByAsin;
 }

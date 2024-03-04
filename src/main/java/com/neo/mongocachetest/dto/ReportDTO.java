@@ -1,20 +1,17 @@
 package com.neo.mongocachetest.dto;
 
 import com.neo.mongocachetest.model.BaseDocument;
-import com.neo.mongocachetest.model.ReportSpecification;
-import com.neo.mongocachetest.model.SalesAndTrafficByAsin;
-import com.neo.mongocachetest.model.SalesAndTrafficByDate;
 import lombok.Data;
 
 
 import java.util.List;
 
 @Data
-public class ReportDTO extends BaseDocument {
+public class ReportDTO {
 
-    public ReportSpecification reportSpecification;
+    public ReportSpecificationDTO reportSpecification;
 
-    public List<SalesAndTrafficByDate> salesAndTrafficByDate;
+    public List<SalesAndTrafficByDateDTO> salesAndTrafficByDate;
 
-    public List<SalesAndTrafficByAsin> salesAndTrafficByAsin;
+    public List<SalesAndTrafficByAsinDTO> salesAndTrafficByAsin;
 }
