@@ -34,24 +34,9 @@ import java.util.stream.Collectors;
 public class ReportService {
 
     private final JSONFileParser jsonFileParser;
-
     private final SalesAndTrafficByDateRepository salesAndTrafficByDateRepository;
-
     private final SalesAndTrafficByAsinRepository salesAndTrafficByAsinRepository;
-
-    private final Map<Class<?>, MongoRepository<?, ?>> repositoryMap;
-
     private final ModelMapper mm;
-
-    private String lastId = "";
-
-    @PostConstruct
-    //@Scheduled(cron = "0 0/1 * * * *")
-    public void loadDataFromLocalFile() {
-        log.info("Loading data from file...");
-        jsonFileParser.extractReportsFromFile().ifPresentOrElse(this::saveReport,
-                () -> log.error("Something went wrong during loading data from local file"));
-    }
 
     public ReportDTO getTotalReport() {
         ReportDTO report = this.getReportWithHeader();
@@ -145,63 +130,6 @@ public class ReportService {
         report.setSalesAndTrafficByAsin(salesAndTrafficByAsinRepository.findByParentAsinIn(ASINs)
                 .stream().map(d -> mm.map(d, SalesAndTrafficByAsinDTO.class)).collect(Collectors.toList()));
         return report;
-    }
-
-
-
-
-    public void saveReport(Report report) {
-        if (lastId.isEmpty()) {
-            saveAssociatedEntities(report);
-            lastId = report.getId();
-            log.info("Data loaded from file!");
-        } else {
-            report.setId(lastId);
-            saveAssociatedEntities(report);
-            log.info("Data updated from file!");
-        }
-    }
-
-    private void saveAssociatedEntities(Object entity) {
-        Field[] fields = entity.getClass().getDeclaredFields();
-        MongoRepository<Object, String> repository;
-        List<?> list = new ArrayList<>();
-        for (Field field : fields) {
-            field.setAccessible(true);
-            try {
-                Object fieldValue = field.get(entity);
-                if (fieldValue instanceof List) {
-                    list = (List<?>) fieldValue;
-                    repository = (MongoRepository<Object, String>) repositoryMap.get(list.get(0).getClass());
-                } else repository = (MongoRepository<Object, String>) repositoryMap.get(field.getType());
-
-                if (field.isAnnotationPresent(CascadeSave.class)) {
-                    if (!list.isEmpty()) {
-                        for (Object obj : list) {
-                            saveAssociatedEntities(obj);
-                            repository.save(obj);
-                        }
-                    } else if (repository != null) {
-                        saveAssociatedEntities(fieldValue);
-                        repository.save(fieldValue);
-                    }
-                } else {
-                    if (fieldValue != null) {
-                        if (repository != null) {
-                            if (!list.isEmpty()) {
-                                for (Object obj : list) {
-                                    repository.save(obj);
-                                }
-                            } else {
-                                repository.save(fieldValue);
-                            }
-                        }
-                    }
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     public ReportDTO getReportWithHeader() {
