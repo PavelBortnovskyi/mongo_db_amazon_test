@@ -1,27 +1,15 @@
 package com.neo.mongocachetest.service;
 
-import com.neo.mongocachetest.annotation.CascadeSave;
 import com.neo.mongocachetest.dto.*;
 import com.neo.mongocachetest.enums.Granularity;
 import com.neo.mongocachetest.enums.ReportType;
-import com.neo.mongocachetest.model.ReportOptions;
-import com.neo.mongocachetest.model.ReportSpecification;
-import com.neo.mongocachetest.model.SalesAndTrafficByDate;
-import com.neo.mongocachetest.repository.ReportRepository;
-import com.neo.mongocachetest.model.Report;
-import com.neo.mongocachetest.repository.SaleByDateRepository;
 import com.neo.mongocachetest.repository.SalesAndTrafficByAsinRepository;
 import com.neo.mongocachetest.repository.SalesAndTrafficByDateRepository;
-import com.neo.mongocachetest.utils.JSONFileParser;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -33,7 +21,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReportService {
 
-    private final JSONFileParser jsonFileParser;
     private final SalesAndTrafficByDateRepository salesAndTrafficByDateRepository;
     private final SalesAndTrafficByAsinRepository salesAndTrafficByAsinRepository;
     private final ModelMapper mm;

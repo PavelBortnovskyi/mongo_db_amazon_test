@@ -5,10 +5,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.neo.mongocachetest.model.*;
 import com.neo.mongocachetest.repository.*;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +34,14 @@ public class AppBeans {
         mm.getConfiguration().setPropertyCondition(u -> u.getSource() != null);
         return mm;
     }
+
+    @Bean
+    public CacheManager cacheManager() {
+        ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager("testCache");
+        cacheManager.setCacheNames(Arrays.asList("testCache"));
+        return cacheManager;
+    }
+
 
     @Bean
     public Map<Class<?>, MongoRepository<?, ?>> repositoryMap(ReportRepository reportRepository,

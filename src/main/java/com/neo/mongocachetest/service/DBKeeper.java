@@ -31,7 +31,7 @@ public class DBKeeper {
     private final SalesAndTrafficByAsinRepository salesAndTrafficByAsinRepository;
 
     @PostConstruct
-    @Scheduled(cron = "0 0/1 * * * *")
+    @Scheduled(cron = "0 0/4 * * * *")
     public void loadDataFromLocalFile() {
         log.info("Loading data from file...");
         jsonFileParser.extractReportsFromFile().ifPresentOrElse(this::saveDataFromFile,
@@ -39,6 +39,7 @@ public class DBKeeper {
     }
 
     public void saveDataFromFile(Report report) {
+        //Bad solution for production. Also, possible to use some boolean flag - initiated
         if (salesAndTrafficByDateRepository.findAll().isEmpty() && salesAndTrafficByAsinRepository.findAll().isEmpty()) {
             saveAssociatedEntities(report);
             log.info("Data loaded from file!");
