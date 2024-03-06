@@ -16,6 +16,11 @@ spring:
       auto-index-creation: true
   jackson:
     time-zone: UTC
+logging:
+ level:
+  org:
+   springframework:
+    security: TRACE
 jwt:
   secret: verySecretUniqueKey
   secretRefresh: wannaRefresh?

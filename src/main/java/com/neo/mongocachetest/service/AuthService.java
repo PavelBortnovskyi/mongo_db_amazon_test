@@ -55,7 +55,6 @@ public class AuthService {
     if (userService.isEmailPresentInDB(signUpDTO.getEmail()))
       throw new UserAlreadyRegisteredException("email: " + signUpDTO.getEmail());
 
-    //Saving new Admin to DB and getting user_id
     signUpDTO.setPassword(encoder.encode(signUpDTO.getPassword()));
     AppUser freshUser = mm.map(signUpDTO, AppUser.class);
     freshUser = userService.save(freshUser);
@@ -65,8 +64,8 @@ public class AuthService {
 
   public String makeLogOut(String userId) {
     jwtTokenService.changeRefreshTokenStatusByUserId(userId, true);
-    log.info("Admin id: " + userId + " logged out");
-    return "Admin with Id: " + userId + " logged out";
+    log.info("User id: " + userId + " logged out");
+    return "User with Id: " + userId + " logged out";
   }
 
   public ResponseEntity<HashMap<String, String>> makeRefresh(HttpServletRequest request) {

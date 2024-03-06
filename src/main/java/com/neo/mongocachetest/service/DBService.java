@@ -23,7 +23,7 @@ import java.util.Map;
 @Log4j2
 @Service
 @RequiredArgsConstructor
-public class DBKeeper {
+public class DBService {
 
     private final JSONFileParser jsonFileParser;
     private final Map<Class<?>, MongoRepository<?, ?>> repositoryMap;

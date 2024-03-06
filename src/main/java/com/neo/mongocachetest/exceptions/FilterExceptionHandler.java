@@ -49,7 +49,6 @@ public class FilterExceptionHandler extends OncePerRequestFilter {
 
         AntPathRequestMatcher[] matchers = {
                 new AntPathRequestMatcher("/swagger-ui/**", requestMethod),
-                new AntPathRequestMatcher("/swagger-resources", requestMethod),
                 new AntPathRequestMatcher("/swagger-resources/**", requestMethod),
                 new AntPathRequestMatcher("/webjars/**", requestMethod),
                 new AntPathRequestMatcher("/v2/api-docs", requestMethod)
