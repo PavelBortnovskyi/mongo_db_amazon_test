@@ -1,4 +1,4 @@
-package com.neo.mongocachetest.dto;
+package com.neo.mongocachetest.dto.response;
 
 import com.neo.mongocachetest.enums.CurrencyCode;
 import lombok.Data;

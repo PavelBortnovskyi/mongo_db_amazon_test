@@ -1,4 +1,4 @@
-package com.neo.mongocachetest.dto;
+package com.neo.mongocachetest.dto.response;
 
 import lombok.Data;
 

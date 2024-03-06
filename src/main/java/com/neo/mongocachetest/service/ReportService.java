@@ -1,6 +1,6 @@
 package com.neo.mongocachetest.service;
 
-import com.neo.mongocachetest.dto.*;
+import com.neo.mongocachetest.dto.response.*;
 import com.neo.mongocachetest.enums.Granularity;
 import com.neo.mongocachetest.enums.ReportType;
 import com.neo.mongocachetest.repository.SalesAndTrafficByAsinRepository;

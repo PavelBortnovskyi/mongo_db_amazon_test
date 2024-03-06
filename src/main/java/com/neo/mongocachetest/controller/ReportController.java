@@ -1,7 +1,7 @@
 package com.neo.mongocachetest.controller;
 
 import com.neo.mongocachetest.constants.Parameters;
-import com.neo.mongocachetest.dto.ReportDTO;
+import com.neo.mongocachetest.dto.response.ReportDTO;
 import com.neo.mongocachetest.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
