@@ -28,26 +28,26 @@ public class ReportController {
 
     private final CacheManager cacheManager;
 
-    @Cacheable("testCache")
+    @Cacheable("fullReport")
     @GetMapping(value = "/reports", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReportDTO> getReportByDate() {
         return ResponseEntity.ok(reportService.getTotalReport());
     }
 
-    @Cacheable("testCache")
+    @Cacheable("allDatesReports")
     @GetMapping(value = "/reports/date", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReportDTO> getReportByDateNotSpecified() {
         return ResponseEntity.ok(reportService.getAllReportsByDate());
     }
 
-    @Cacheable("testCache")
+    @Cacheable("specificDateReport")
     @GetMapping(value = "/reports/date/{date}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReportDTO> getReportByDate(@PathVariable(value = Parameters.DATE)
                                                      @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
         return ResponseEntity.ok(reportService.getReportByDate(date));
     }
 
-    @Cacheable("testCache")
+    @Cacheable("dataRangeReport")
     @GetMapping(value = "/reports/date/range", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReportDTO> getReportByDateRange(@RequestParam(value = Parameters.START_DATE)
                                                           @DateTimeFormat(pattern = "yyyy-MM-dd") Date startDate,
@@ -56,27 +56,28 @@ public class ReportController {
         return ResponseEntity.ok(reportService.getReportByDateRange(startDate, endDate));
     }
 
-    @Cacheable("testCache")
+    @Cacheable("asinReport")
     @GetMapping(value = "/reports/asin", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReportDTO> getReportByAsin() {
         return ResponseEntity.ok(reportService.getAllReportByAsin());
     }
 
-    @Cacheable("testCache")
+    @Cacheable("specificAsinReport")
     @GetMapping(value = "/reports/asin/{asin}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReportDTO> getReportByAsin(@PathVariable(value = Parameters.ASIN) String ASIN) {
         return ResponseEntity.ok(reportService.getReportByAsin(ASIN));
     }
 
-    @Cacheable("testCache")
+    @Cacheable("asinListReport")
     @GetMapping(value = "/reports/asin/list", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReportDTO> getReportByAsinList(@RequestParam(value = Parameters.ASIN) List<String> asinList) {
         return ResponseEntity.ok(reportService.getReportByAsinList(asinList));
     }
 
     @Scheduled(cron = "0 0/5 * * * *")
-    @CacheEvict(value = "testCache", allEntries = true)
     public void evictAllCacheValues() {
-        cacheManager.getCache("testCache").clear();
+        for (String cacheName : cacheManager.getCacheNames()) {
+            cacheManager.getCache(cacheName).clear();
+        }
     }
 }
