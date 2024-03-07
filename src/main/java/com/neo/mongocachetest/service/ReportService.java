@@ -1,95 +1,134 @@
 package com.neo.mongocachetest.service;
 
-import com.neo.mongocachetest.annotation.CascadeSave;
-import com.neo.mongocachetest.repository.ReportRepository;
-import com.neo.mongocachetest.model.Report;
-import com.neo.mongocachetest.utils.JSONFileParser;
-import jakarta.annotation.PostConstruct;
+import com.neo.mongocachetest.dto.response.*;
+import com.neo.mongocachetest.enums.Granularity;
+import com.neo.mongocachetest.enums.ReportType;
+import com.neo.mongocachetest.repository.SalesAndTrafficByAsinRepository;
+import com.neo.mongocachetest.repository.SalesAndTrafficByDateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Service
 @RequiredArgsConstructor
 public class ReportService {
 
-    private final JSONFileParser jsonFileParser;
+    private final SalesAndTrafficByDateRepository salesAndTrafficByDateRepository;
+    private final SalesAndTrafficByAsinRepository salesAndTrafficByAsinRepository;
+    private final ModelMapper mm;
 
-    private final ReportRepository reportRepository;
-
-    private final Map<Class<?>, MongoRepository<?, ?>> repositoryMap;
-
-    private String lastId = "";
-
-    @PostConstruct
-    //@Scheduled(cron = "0 0/1 * * * *")
-    public void loadDataFromLocalFile() {
-        log.info("Loading data from file...");
-        log.info(jsonFileParser.extractReportsFromFile().get().getReportSpecification().getDataStartTime());
-        log.info(jsonFileParser.extractReportsFromFile().get().getReportSpecification().getDataEndTime());
-        jsonFileParser.extractReportsFromFile().ifPresentOrElse(this::saveReport,
-                () -> log.error("Something went wrong during loading data from local file"));
+    public ReportDTO getTotalReport() {
+        ReportDTO report = this.getReportWithHeader();
+        ReportSpecificationDTO reportSpecification = report.getReportSpecification();
+        report.setSalesAndTrafficByDate(salesAndTrafficByDateRepository.findAll()
+                .stream()
+                .map(s -> mm.map(s, SalesAndTrafficByDateDTO.class))
+                .collect(Collectors.toList()));
+        report.setSalesAndTrafficByAsin(salesAndTrafficByAsinRepository.findAll()
+                .stream()
+                .map(s -> mm.map(s, SalesAndTrafficByAsinDTO.class))
+                .collect(Collectors.toList()));
+        reportSpecification.setDataStartTime(report.getSalesAndTrafficByDate().get(0).getDate());
+        reportSpecification.setDataEndTime(report.getSalesAndTrafficByDate().get(report.getSalesAndTrafficByDate().size() - 1).getDate());
+        report.setReportSpecification(reportSpecification);
+        return report;
     }
 
-    public void saveReport(Report report) {
-        if (lastId.isEmpty()) {
-            saveAssociatedEntities(report);
-            report = reportRepository.save(report);
-            lastId = report.getId();
-            log.info("Data loaded from file!");
-        } else {
-            report.setId(lastId);
-            saveAssociatedEntities(report);
-            reportRepository.save(report);
-            log.info("Data updated from file!");
-        }
+    public ReportDTO getAllReportsByDate() {
+        ReportDTO report = this.getReportWithHeader();
+        ReportSpecificationDTO reportSpecification = report.getReportSpecification();
+        report.setSalesAndTrafficByDate(salesAndTrafficByDateRepository.findAll()
+                .stream()
+                .map(s -> mm.map(s, SalesAndTrafficByDateDTO.class))
+                .collect(Collectors.toList()));
+        reportSpecification.setDataStartTime(report.getSalesAndTrafficByDate().get(0).getDate());
+        reportSpecification.setDataEndTime(report.getSalesAndTrafficByDate().get(report.getSalesAndTrafficByDate().size() - 1).getDate());
+        report.setReportSpecification(reportSpecification);
+        return report;
     }
 
-    private void saveAssociatedEntities(Object entity) {
-        Field[] fields = entity.getClass().getDeclaredFields();
-        MongoRepository<Object, String> repository;
-        List<?> list = new ArrayList<>();
-        for (Field field : fields) {
-            field.setAccessible(true);
-            try {
-                Object fieldValue = field.get(entity);
-                if (fieldValue instanceof List) {
-                    list = (List<?>) fieldValue;
-                    repository = (MongoRepository<Object, String>) repositoryMap.get(list.get(0).getClass());
-                } else repository = (MongoRepository<Object, String>) repositoryMap.get(field.getType());
+    public ReportDTO getReportByDate(Date date) {
+        ReportDTO report = this.getReportWithHeader();
+        report.getReportSpecification().setDataStartTime(date);
+        report.getReportSpecification().setDataEndTime(date);
+        report.setSalesAndTrafficByDate(new ArrayList<>() {{
+            add(salesAndTrafficByDateRepository.findByDate(date)
+                    .map(d -> mm.map(d, SalesAndTrafficByDateDTO.class))
+                    .orElse(null));
+        }});
+        return report;
+    }
 
-                if (field.isAnnotationPresent(CascadeSave.class)) {
-                    if (!list.isEmpty()) {
-                        for (Object obj : list) {
-                            saveAssociatedEntities(obj);
-                            repository.save(obj);
-                        }
-                    } else {
-                        saveAssociatedEntities(fieldValue);
-                        repository.save(fieldValue);
-                    }
-                } else {
-                    if (fieldValue != null) {
-                        if (repository != null) {
-                            if (!list.isEmpty()) {
-                                for (Object obj : list) {
-                                    repository.save(obj);
-                                }
-                            } else {
-                                repository.save(fieldValue);
-                            }
-                        }
-                    }
-                }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
+    public ReportDTO getReportByDateRange(Date startDate, Date endDate) {
+        ReportDTO report = this.getReportWithHeader();
+
+        report.getReportSpecification().setDataStartTime(startDate);
+        report.getReportSpecification().setDataEndTime(endDate);
+
+        LocalDate startDateInclusive = Instant.ofEpochMilli(startDate.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .minusDays(1);
+        LocalDate endDateInclusive = Instant.ofEpochMilli(endDate.getTime())
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate()
+                .plusDays(1);
+        startDate = Date.from(startDateInclusive.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        endDate = Date.from(endDateInclusive.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        report.setSalesAndTrafficByDate(salesAndTrafficByDateRepository.findByDateBetween(startDate, endDate)
+                .stream()
+                .map((d) -> mm.map(d, SalesAndTrafficByDateDTO.class))
+                .collect(Collectors.toList()));
+        return report;
+    }
+
+    public ReportDTO getAllReportByAsin() {
+        ReportDTO report = this.getReportWithHeader();
+        ReportSpecificationDTO reportSpecification = report.getReportSpecification();
+        report.setSalesAndTrafficByAsin(salesAndTrafficByAsinRepository.findAll()
+                .stream()
+                .map(s -> mm.map(s, SalesAndTrafficByAsinDTO.class))
+                .collect(Collectors.toList()));
+        report.setReportSpecification(reportSpecification);
+        return report;
+    }
+
+    public ReportDTO getReportByAsin(String ASIN) {
+        ReportDTO report = this.getReportWithHeader();
+        report.setSalesAndTrafficByAsin(new ArrayList<>() {{
+            add(salesAndTrafficByAsinRepository.findByParentAsin(ASIN)
+                    .map(d -> mm.map(d, SalesAndTrafficByAsinDTO.class))
+                    .orElse(null));
+        }});
+        return report;
+    }
+
+    public ReportDTO getReportByAsinList(List<String> ASINs) {
+        ReportDTO report = this.getReportWithHeader();
+        report.setSalesAndTrafficByAsin(salesAndTrafficByAsinRepository.findByParentAsinIn(ASINs)
+                .stream().map(d -> mm.map(d, SalesAndTrafficByAsinDTO.class)).collect(Collectors.toList()));
+        return report;
+    }
+
+    public ReportDTO getReportWithHeader() {
+        ReportDTO report = new ReportDTO();
+        ReportSpecificationDTO reportSpecification = new ReportSpecificationDTO();
+        ReportOptionsDTO reportOptions = new ReportOptionsDTO();
+        reportOptions.setAsinGranularity("PARENT");
+        reportOptions.setDateGranularity(Granularity.DAY);
+        reportSpecification.setReportOptions(reportOptions);
+        reportSpecification.setReportType(ReportType.GET_SALES_AND_TRAFFIC_REPORT);
+        reportSpecification.setMarketplaceIds(List.of("ATVPDKIKX0DER"));
+        report.setReportSpecification(reportSpecification);
+        return report;
     }
 }

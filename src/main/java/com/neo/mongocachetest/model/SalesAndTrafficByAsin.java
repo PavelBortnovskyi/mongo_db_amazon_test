@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document
 public class SalesAndTrafficByAsin extends BaseDocument{
 
-    @Indexed
+    @Indexed(unique = true)
     public String parentAsin;
 
     @DBRef

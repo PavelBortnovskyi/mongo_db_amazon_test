@@ -16,15 +16,15 @@
       "date": "2024-02-14",
       "salesByDate": {
         "orderedProductSales": {
-          "amount": 10614.69,
+          "amount": 5555.69,
           "currencyCode": "USD"
         },
         "orderedProductSalesB2B": {
           "amount": 204.48,
           "currencyCode": "USD"
         },
-        "unitsOrdered": 526,
-        "unitsOrderedB2B": 9,
+        "unitsOrdered": 600,
+        "unitsOrderedB2B": 10,
         "totalOrderItems": 496,
         "totalOrderItemsB2B": 8,
         "averageSalesPerOrderItem": {
