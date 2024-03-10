@@ -6,7 +6,6 @@ import com.neo.mongocachetest.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -37,7 +36,7 @@ public class ReportController {
     @Cacheable("allDatesReports")
     @GetMapping(value = "/reports/date", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReportDTO> getReportByDateNotSpecified() {
-        return ResponseEntity.ok(reportService.getAllReportsByDate());
+        return ResponseEntity.ok(reportService.getSummaryReportsByDate());
     }
 
     @Cacheable("specificDateReport")

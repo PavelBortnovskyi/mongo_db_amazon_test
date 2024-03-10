@@ -12,9 +12,9 @@ import java.math.BigDecimal;
 @Document
 public class ProductSale extends BaseDocument{
 
-    @DecimalMin(value = "0.00", inclusive = true)
-    @Digits(integer=7, fraction=2)
-    public BigDecimal amount;
+//    @DecimalMin(value = "0.00", inclusive = true)
+//    @Digits(integer=7, fraction=2)
+    public Double amount;
 
     public CurrencyCode currencyCode;
 }

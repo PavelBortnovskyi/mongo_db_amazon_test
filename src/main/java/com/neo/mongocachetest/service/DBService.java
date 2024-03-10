@@ -31,7 +31,7 @@ public class DBService {
     private final SalesAndTrafficByAsinRepository salesAndTrafficByAsinRepository;
 
     @PostConstruct
-    @Scheduled(cron = "0 0/2 * * * *")
+    @Scheduled(cron = "0 0/1 * * * *")
     public void loadDataFromLocalFile() {
         log.info("Loading data from file...");
         jsonFileParser.extractReportsFromFile().ifPresentOrElse(this::saveDataFromFile,
