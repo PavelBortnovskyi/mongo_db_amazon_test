@@ -2,7 +2,6 @@ package com.neo.mongocachetest.dto.response;
 
 import lombok.Data;
 
-
 @Data
 public class SalesAndTrafficByAsinDTO {
 

@@ -1,5 +1,6 @@
 package com.neo.mongocachetest.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 
@@ -32,7 +33,8 @@ public class SaleByDateDTO {
 
     public Long unitsRefunded;
 
-    public Double refundRate;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
+    public Float refundRate;
 
     public Integer claimsGranted;
 

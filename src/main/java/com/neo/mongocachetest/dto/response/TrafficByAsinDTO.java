@@ -1,9 +1,6 @@
 package com.neo.mongocachetest.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.neo.mongocachetest.model.BaseDocument;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Digits;
 import lombok.Data;
 
 @Data
@@ -22,22 +19,22 @@ public class TrafficByAsinDTO {
     public Integer sessionsB2B;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double browserSessionPercentage;
+    public Float browserSessionPercentage;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double browserSessionPercentageB2B;
+    public Float browserSessionPercentageB2B;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double mobileAppSessionPercentage;
+    public Float mobileAppSessionPercentage;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double mobileAppSessionPercentageB2B;
+    public Float mobileAppSessionPercentageB2B;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double sessionPercentage;
+    public Float sessionPercentage;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double sessionPercentageB2B;
+    public Float sessionPercentageB2B;
 
     public Integer browserPageViews;
 
@@ -52,31 +49,32 @@ public class TrafficByAsinDTO {
     public Integer pageViewsB2B;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double browserPageViewsPercentage;
+    public Float browserPageViewsPercentage;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double browserPageViewsPercentageB2B;
+    public Float browserPageViewsPercentageB2B;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double mobileAppPageViewsPercentage;
+    public Float mobileAppPageViewsPercentage;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double mobileAppPageViewsPercentageB2B;
+    public Float mobileAppPageViewsPercentageB2B;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double pageViewsPercentage;
+    public Float pageViewsPercentage;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double pageViewsPercentageB2B;
+    public Float pageViewsPercentageB2B;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double buyBoxPercentage;
+    public Float buyBoxPercentage;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double buyBoxPercentageB2B;
+    public Float buyBoxPercentageB2B;
 
     @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
-    public Double unitSessionPercentage;
+    public Float unitSessionPercentage;
 
-    public Double unitSessionPercentageB2B;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
+    public Float unitSessionPercentageB2B;
 }

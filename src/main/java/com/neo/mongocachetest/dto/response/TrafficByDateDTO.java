@@ -1,5 +1,6 @@
 package com.neo.mongocachetest.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 @Data
@@ -29,17 +30,23 @@ public class TrafficByDateDTO {
 
     public Integer sessionsB2B;
 
-    public Double buyBoxPercentage;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
+    public Float buyBoxPercentage;
 
-    public Double buyBoxPercentageB2B;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
+    public Float buyBoxPercentageB2B;
 
-    public Double orderItemSessionPercentage;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
+    public Float orderItemSessionPercentage;
 
-    public Double orderItemSessionPercentageB2B;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
+    public Float orderItemSessionPercentageB2B;
 
-    public Double unitSessionPercentage;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
+    public Float unitSessionPercentage;
 
-    public Double unitSessionPercentageB2B;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER_FLOAT, pattern = "#0.00")
+    public Float unitSessionPercentageB2B;
 
     public Integer averageOfferCount;
 

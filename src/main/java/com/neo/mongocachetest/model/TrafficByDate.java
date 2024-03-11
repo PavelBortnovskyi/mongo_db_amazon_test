@@ -31,17 +31,17 @@ public class TrafficByDate extends BaseDocument{
 
     public Integer sessionsB2B;
 
-    public Double buyBoxPercentage;
+    public Float buyBoxPercentage;
 
-    public Double buyBoxPercentageB2B;
+    public Float buyBoxPercentageB2B;
 
-    public Double orderItemSessionPercentage;
+    public Float orderItemSessionPercentage;
 
-    public Double orderItemSessionPercentageB2B;
+    public Float orderItemSessionPercentageB2B;
 
-    public Double unitSessionPercentage;
+    public Float unitSessionPercentage;
 
-    public Double unitSessionPercentageB2B;
+    public Float unitSessionPercentageB2B;
 
     public Integer averageOfferCount;
 

@@ -40,7 +40,7 @@ public class SaleByDate extends BaseDocument{
 
     public Long unitsRefunded;
 
-    public Double refundRate;
+    public Float refundRate;
 
     public Integer claimsGranted;
 

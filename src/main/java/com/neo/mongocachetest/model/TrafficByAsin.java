@@ -19,17 +19,17 @@ public class TrafficByAsin extends BaseDocument{
 
     public Integer sessionsB2B;
 
-    public Double browserSessionPercentage;
+    public Float browserSessionPercentage;
 
-    public Double browserSessionPercentageB2B;
+    public Float browserSessionPercentageB2B;
 
-    public Double mobileAppSessionPercentage;
+    public Float mobileAppSessionPercentage;
 
-    public Double mobileAppSessionPercentageB2B;
+    public Float mobileAppSessionPercentageB2B;
 
-    public Double sessionPercentage;
+    public Float sessionPercentage;
 
-    public Double sessionPercentageB2B;
+    public Float sessionPercentageB2B;
 
     public Integer browserPageViews;
 
@@ -43,23 +43,23 @@ public class TrafficByAsin extends BaseDocument{
 
     public Integer pageViewsB2B;
 
-    public Double browserPageViewsPercentage;
+    public Float browserPageViewsPercentage;
 
-    public Double browserPageViewsPercentageB2B;
+    public Float browserPageViewsPercentageB2B;
 
-    public Double mobileAppPageViewsPercentage;
+    public Float mobileAppPageViewsPercentage;
 
-    public Double mobileAppPageViewsPercentageB2B;
+    public Float mobileAppPageViewsPercentageB2B;
 
-    public Double pageViewsPercentage;
+    public Float pageViewsPercentage;
 
-    public Double pageViewsPercentageB2B;
+    public Float pageViewsPercentageB2B;
 
-    public Double buyBoxPercentage;
+    public Float buyBoxPercentage;
 
-    public Double buyBoxPercentageB2B;
+    public Float buyBoxPercentageB2B;
 
-    public Double unitSessionPercentage;
+    public Float unitSessionPercentage;
 
-    public Double unitSessionPercentageB2B;
+    public Float unitSessionPercentageB2B;
 }
