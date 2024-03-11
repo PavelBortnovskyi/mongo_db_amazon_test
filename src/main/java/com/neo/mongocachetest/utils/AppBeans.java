@@ -50,8 +50,8 @@ public class AppBeans {
     @Bean
     public CacheManager cacheManager() {
         ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
-        cacheManager.setCacheNames(Arrays.asList("fullReport", "allDatesReports", "specificDateReport",
-                "dataRangeReport", "asinReport", "specificAsinReport", "asinListReport"));
+        cacheManager.setCacheNames(Arrays.asList("fullReport", "summaryAllDatesReports", "specificDateReport",
+                "dataRangeReport", "summaryAllAsinReport", "specificAsinReport", "asinListReport"));
         return cacheManager;
     }
     @Bean

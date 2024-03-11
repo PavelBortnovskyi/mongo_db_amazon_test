@@ -33,8 +33,8 @@ public class ReportController {
         return ResponseEntity.ok(reportService.getTotalReport());
     }
 
-    @Cacheable("allDatesReports")
-    @GetMapping(value = "/reports/date", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Cacheable("summaryAllDatesReports")
+    @GetMapping(value = "/reports/date/summary", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReportDTO> getReportByDateNotSpecified() {
         return ResponseEntity.ok(reportService.getSummaryReportsByDate());
     }
@@ -55,10 +55,10 @@ public class ReportController {
         return ResponseEntity.ok(reportService.getReportByDateRange(startDate, endDate));
     }
 
-    @Cacheable("asinReport")
-    @GetMapping(value = "/reports/asin", produces = MediaType.APPLICATION_JSON_VALUE)
+    @Cacheable("summaryAllAsinReport")
+    @GetMapping(value = "/reports/asin/summary", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ReportDTO> getReportByAsin() {
-        return ResponseEntity.ok(reportService.getAllReportByAsin());
+        return ResponseEntity.ok(reportService.getSummaryReportsByAsin());
     }
 
     @Cacheable("specificAsinReport")

@@ -1,10 +1,9 @@
 package com.neo.mongocachetest.service;
 
-import com.mongodb.BasicDBObjectBuilder;
 import com.neo.mongocachetest.dto.response.*;
-import com.neo.mongocachetest.enums.CurrencyCode;
 import com.neo.mongocachetest.enums.Granularity;
 import com.neo.mongocachetest.enums.ReportType;
+import com.neo.mongocachetest.model.SalesAndTrafficByAsin;
 import com.neo.mongocachetest.model.SalesAndTrafficByDate;
 import com.neo.mongocachetest.repository.SalesAndTrafficByAsinRepository;
 import com.neo.mongocachetest.repository.SalesAndTrafficByDateRepository;
@@ -58,8 +57,17 @@ public class ReportService {
         Pair<Date, Date> datePair = this.findEarliestAndLatestDate();
         reportSpecification.setDataStartTime(datePair.getFirst());
         reportSpecification.setDataEndTime(datePair.getSecond());
-        SalesAndTrafficByDate summary = this.getSalesAndTrafficSummary();
+        SalesAndTrafficByDate summary = this.getSalesAndTrafficByDateSummary();
         report.setSalesAndTrafficByDate(List.of(mm.map(summary, SalesAndTrafficByDateDTO.class)));
+        report.setReportSpecification(reportSpecification);
+        return report;
+    }
+
+    public ReportDTO getSummaryReportsByAsin() {
+        ReportDTO report = this.getReportWithHeader();
+        ReportSpecificationDTO reportSpecification = report.getReportSpecification();
+        SalesAndTrafficByAsin summary = this.getSalesAndTrafficByAsinSummary();
+        report.setSalesAndTrafficByAsin(List.of(mm.map(summary, SalesAndTrafficByAsinDTO.class)));
         report.setReportSpecification(reportSpecification);
         return report;
     }
@@ -141,7 +149,7 @@ public class ReportService {
         return report;
     }
 
-    public SalesAndTrafficByDate getSalesAndTrafficSummary() {
+    public SalesAndTrafficByDate getSalesAndTrafficByDateSummary() {
         AggregationOperation lookupSalesByDate = Aggregation.lookup("saleByDate", "salesByDate.$id", "_id", "lookupSalesByDate");
         AggregationOperation unwindSalesByDate = Aggregation.unwind("$lookupSalesByDate");
 
@@ -355,5 +363,132 @@ public class ReportService {
         Date latestDate = aggregationResults.getDate("endDate");
 
         return Pair.of(earliestDate, latestDate);
+    }
+
+    public SalesAndTrafficByAsin getSalesAndTrafficByAsinSummary() {
+        AggregationOperation lookupSalesByAsin = Aggregation.lookup("saleByAsin", "salesByAsin.$id", "_id", "lookupSalesByAsin");
+        AggregationOperation unwindSalesByAsin = Aggregation.unwind("$lookupSalesByAsin");
+
+        AggregationOperation lookupOrderedProductSales = Aggregation.lookup("productSale", "lookupSalesByAsin.orderedProductSales.$id", "_id", "lookupOrderedProductSales");
+        AggregationOperation unwindOrderedProductSales = Aggregation.unwind("$lookupOrderedProductSales");
+
+        AggregationOperation lookupOrderedProductSalesB2B = Aggregation.lookup("productSale", "lookupSalesByAsin.orderedProductSalesB2B.$id", "_id", "lookupOrderedProductSalesB2B");
+        AggregationOperation unwindOrderedProductSalesB2B = Aggregation.unwind("$lookupOrderedProductSalesB2B");
+
+        AggregationOperation lookupTrafficByAsin = Aggregation.lookup("trafficByAsin", "trafficByAsin.$id", "_id", "lookupTrafficByAsin");
+        AggregationOperation unwindTrafficByAsin = Aggregation.unwind("$lookupTrafficByAsin");
+
+        AggregationOperation group = Aggregation
+                .group()
+                .sum("$lookupSalesByAsin.unitsOrdered").as("totalUnitsOrdered")
+                .sum("$lookupSalesByAsin.unitsOrderedB2B").as("totalUnitsOrderedB2B")
+                .sum("$lookupOrderedProductSales.amount").as("totalOrderedProductSales")
+                .sum("$lookupOrderedProductSalesB2B.amount").as("totalOrderedProductSalesB2B")
+                .sum("$lookupSalesByAsin.totalOrderItems").as("totalOrderItems")
+                .sum("$lookupSalesByAsin.totalOrderItemsB2B").as("totalOrderItemsB2B")
+                .sum("$lookupTrafficByAsin.browserSessions").as("totalBrowserSessions")
+                .sum("$lookupTrafficByAsin.browserSessionsB2B").as("totalBrowserSessionsB2B")
+                .sum("$lookupTrafficByAsin.mobileAppSessions").as("totalMobileAppSessions")
+                .sum("$lookupTrafficByAsin.mobileAppSessionsB2B").as("totalMobileAppSessionsB2B")
+                .sum("$lookupTrafficByAsin.sessions").as("totalSessions")
+                .sum("$lookupTrafficByAsin.sessionsB2B").as("totalSessionsB2B")
+                .avg("$lookupTrafficByAsin.browserSessionPercentage").as("totalBrowserSessionPercentage")
+                .avg("$lookupTrafficByAsin.browserSessionPercentageB2B").as("totalBrowserSessionPercentageB2B")
+                .avg("$lookupTrafficByAsin.mobileAppSessionPercentage").as("totalMobileAppSessionPercentage")
+                .avg("$lookupTrafficByAsin.mobileAppSessionPercentageB2B").as("totalMobileAppSessionPercentageB2B")
+                .avg("$lookupTrafficByAsin.sessionPercentage").as("totalSessionPercentage")
+                .avg("$lookupTrafficByAsin.sessionPercentageB2B").as("totalSessionPercentageB2B")
+                .sum("$lookupTrafficByAsin.browserPageViews").as("totalBrowserPageViews")
+                .sum("$lookupTrafficByAsin.browserPageViewsB2B").as("totalBrowserPageViewsB2B")
+                .sum("$lookupTrafficByAsin.mobileAppPageViews").as("totalMobileAppPageViews")
+                .sum("$lookupTrafficByAsin.mobileAppPageViewsB2B").as("totalMobileAppPageViewsB2B")
+                .sum("$lookupTrafficByAsin.pageViews").as("totalPageViews")
+                .sum("$lookupTrafficByAsin.pageViewsB2B").as("totalPageViewsB2B")
+                .avg("$lookupTrafficByAsin.browserPageViewsPercentage").as("totalBrowserPageViewsPercentage")
+                .avg("$lookupTrafficByAsin.browserPageViewsPercentageB2B").as("totalBrowserPageViewsPercentageB2B")
+                .avg("$lookupTrafficByAsin.mobileAppPageViewsPercentage").as("totalMobileAppPageViewsPercentage")
+                .avg("$lookupTrafficByAsin.mobileAppPageViewsPercentageB2B").as("totalMobileAppPageViewsPercentageB2B")
+                .avg("$lookupTrafficByAsin.pageViewsPercentage").as("totalPageViewsPercentage")
+                .avg("$lookupTrafficByAsin.pageViewsPercentageB2B").as("totalPageViewsPercentageB2B")
+                .avg("$lookupTrafficByAsin.buyBoxPercentage").as("totalBuyBoxPercentage")            //recalculate
+                .avg("$lookupTrafficByAsin.buyBoxPercentageB2B").as("totalBuyBoxPercentageB2B")      //recalculate
+                .avg("$lookupTrafficByAsin.unitSessionPercentage").as("totalUnitSessionPercentage")
+                .avg("$lookupTrafficByAsin.unitSessionPercentageB2B").as("totalUnitSessionPercentageB2B")
+                .addToSet("$lookupOrderedProductSales.currencyCode").as("OrderedProductSalesCurrencyCode")
+                .addToSet("$lookupOrderedProductSalesB2B.currencyCode").as("OrderedProductSalesB2BCurrencyCode");
+
+        AggregationOperation projection = Aggregation.project()
+                .and(
+                        new AggregationExpression() {
+                            @Override
+                            public Document toDocument(AggregationOperationContext context) {
+                                Document salesByDate = new Document();
+                                salesByDate.put("unitsOrdered", "$totalUnitsOrdered");
+                                salesByDate.put("unitsOrderedB2B", "$totalUnitsOrderedB2B");
+                                salesByDate.put("totalOrderItems", "$totalOrderItems");
+                                salesByDate.put("totalOrderItemsB2B", "$totalOrderItemsB2B");
+
+                                Document orderedProductSale = new Document();
+                                orderedProductSale.put("amount", "$totalOrderedProductSales");
+                                orderedProductSale.put("currencyCode", new Document("$arrayElemAt", Arrays.asList("$OrderedProductSalesCurrencyCode", 0)));
+                                salesByDate.put("orderedProductSales", orderedProductSale);
+
+                                Document orderedProductSaleB2B = new Document();
+                                orderedProductSaleB2B.put("amount", "$totalOrderedProductSalesB2B");
+                                orderedProductSaleB2B.put("currencyCode", new Document("$arrayElemAt", Arrays.asList("$OrderedProductSalesB2BCurrencyCode", 0)));
+                                salesByDate.put("orderedProductSalesB2B", orderedProductSaleB2B);
+
+                                return salesByDate;
+                            }
+                        }
+                ).as("salesByAsin")
+                .and("trafficByAsin")
+                .nested(bind("browserSessions", "$totalBrowserSessions")
+                        .and("browserSessionsB2B", "$totalBrowserSessionsB2B")
+                        .and("mobileAppSessions", "$totalMobileAppSessions")
+                        .and("mobileAppSessionsB2B", "$totalMobileAppSessionsB2B")
+                        .and("sessions", "$totalSessions")
+                        .and("sessionsB2B", "$totalSessionsB2B")
+                        .and("browserSessionPercentage", "$totalBrowserSessionPercentage")
+                        .and("browserSessionPercentageB2B", "$totalBrowserSessionPercentageB2B")
+                        .and("mobileAppSessionPercentage", "$totalMobileAppSessionPercentage")
+                        .and("mobileAppSessionPercentageB2B", "$totalMobileAppSessionPercentageB2B")
+                        .and("sessionPercentage", "$totalSessionPercentage")
+                        .and("sessionPercentageB2B", "$totalSessionPercentageB2B")
+                        .and("browserPageViews", "$totalBrowserPageViews")
+                        .and("browserPageViewsB2B", "$totalBrowserPageViewsB2B")
+                        .and("mobileAppPageViews", "$totalMobileAppPageViews")
+                        .and("mobileAppPageViewsB2B", "$totalMobileAppPageViewsB2B")
+                        .and("pageViews", "$totalPageViews")
+                        .and("pageViewsB2B", "$totalPageViewsB2B")
+                        .and("browserPageViewsPercentage", "$totalBrowserPageViewsPercentage")
+                        .and("browserPageViewsPercentageB2B", "$totalBrowserPageViewsPercentageB2B")
+                        .and("mobileAppPageViewsPercentage", "$totalMobileAppPageViewsPercentage")
+                        .and("mobileAppPageViewsPercentageB2B", "$totalMobileAppPageViewsPercentageB2B")
+                        .and("pageViewsPercentage", "$totalPageViewsPercentage")
+                        .and("pageViewsPercentageB2B", "$totalPageViewsPercentageB2B")
+                        .and("buyBoxPercentage", "$totalBuyBoxPercentage")
+                        .and("buyBoxPercentageB2B", "$totalBuyBoxPercentageB2B")
+                        .and("unitSessionPercentage", "$totalUnitSessionPercentage")
+                        .and("unitSessionPercentageB2B", "$totalUnitSessionPercentageB2B"));
+
+        TypedAggregation<SalesAndTrafficByAsin> aggregation = Aggregation.newAggregation(
+                SalesAndTrafficByAsin.class,
+                lookupSalesByAsin,
+                unwindSalesByAsin,
+                lookupOrderedProductSales,
+                unwindOrderedProductSales,
+                lookupOrderedProductSalesB2B,
+                unwindOrderedProductSalesB2B,
+                lookupTrafficByAsin,
+                unwindTrafficByAsin,
+                group,
+                projection
+        );
+
+        AggregationResults<SalesAndTrafficByAsin> results = mongoTemplate.aggregate(aggregation,
+                "salesAndTrafficByAsin", SalesAndTrafficByAsin.class);
+
+        return results.getUniqueMappedResult();
     }
 }
