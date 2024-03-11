@@ -14,6 +14,7 @@ import org.bson.Document;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -54,10 +55,11 @@ public class ReportService {
     public ReportDTO getSummaryReportsByDate() {
         ReportDTO report = this.getReportWithHeader();
         ReportSpecificationDTO reportSpecification = report.getReportSpecification();
+        Pair<Date, Date> datePair = this.findEarliestAndLatestDate();
+        reportSpecification.setDataStartTime(datePair.getFirst());
+        reportSpecification.setDataEndTime(datePair.getSecond());
         SalesAndTrafficByDate summary = this.getSalesAndTrafficSummary();
         report.setSalesAndTrafficByDate(List.of(mm.map(summary, SalesAndTrafficByDateDTO.class)));
-//        reportSpecification.setDataStartTime(report.getSalesAndTrafficByDate().get(0).getDate());
-//        reportSpecification.setDataEndTime(report.getSalesAndTrafficByDate().get(report.getSalesAndTrafficByDate().size() - 1).getDate());
         report.setReportSpecification(reportSpecification);
         return report;
     }
@@ -213,10 +215,17 @@ public class ReportService {
                 .avg("$lookupTrafficByDate.averageParentItems").as("totalAverageParentItems")
                 .sum("$lookupTrafficByDate.feedbackReceived").as("totalFeedbackReceived")
                 .sum("$lookupTrafficByDate.negativeFeedbackReceived").as("totalNegativeFeedbackReceived")
-                .sum("$lookupTrafficByDate.receivedNegativeFeedbackRate").as("totalReceivedNegativeFeedbackRate");
+                .sum("$lookupTrafficByDate.receivedNegativeFeedbackRate").as("totalReceivedNegativeFeedbackRate")
+                .addToSet("$lookupOrderedProductSales.currencyCode").as("OrderedProductSalesCurrencyCode")
+                .addToSet("$lookupOrderedProductSalesB2B.currencyCode").as("OrderedProductSalesB2BCurrencyCode")
+                .addToSet("$lookupAverageSalesPerOrderItem.currencyCode").as("AverageSalesPerOrderItemCurrencyCode")
+                .addToSet("$lookupAverageSalesPerOrderItemB2B.currencyCode").as("AverageSalesPerOrderItemB2BCurrencyCode")
+                .addToSet("$lookupAverageSellingPrice.currencyCode").as("AverageSellingPriceCurrencyCode")
+                .addToSet("$lookupAverageSellingPriceB2B.currencyCode").as("AverageSellingPriceB2BCurrencyCode")
+                .addToSet("$lookupClaimsAmount.currencyCode").as("ClaimsAmountCurrencyCode")
+                .addToSet("$lookupShippedProductSales.currencyCode").as("ShippedProductSalesCurrencyCode");
 
-        AggregationOperation projection = Aggregation. project()
-                //.and("date").as(null)
+        AggregationOperation projection = Aggregation.project()
                 .and(
                         new AggregationExpression() {
                             @Override
@@ -236,42 +245,42 @@ public class ReportService {
 
                                 Document orderedProductSale = new Document();
                                 orderedProductSale.put("amount", "$totalOrderedProductSales");
-                                orderedProductSale.put("currencyCode", CurrencyCode.USD);
+                                orderedProductSale.put("currencyCode", new Document("$arrayElemAt", Arrays.asList("$OrderedProductSalesCurrencyCode", 0)));
                                 salesByDate.put("orderedProductSales", orderedProductSale);
 
                                 Document orderedProductSaleB2B = new Document();
                                 orderedProductSaleB2B.put("amount", "$totalOrderedProductSalesB2B");
-                                orderedProductSaleB2B.put("currencyCode", CurrencyCode.USD);
+                                orderedProductSaleB2B.put("currencyCode", new Document("$arrayElemAt", Arrays.asList("$OrderedProductSalesB2BCurrencyCode", 0)));
                                 salesByDate.put("orderedProductSalesB2B", orderedProductSaleB2B);
 
                                 Document averageSalesPerOrderItem = new Document();
                                 averageSalesPerOrderItem.put("amount", "$totalAverageSalesPerOrderItem");
-                                averageSalesPerOrderItem.put("currencyCode", CurrencyCode.USD);
+                                averageSalesPerOrderItem.put("currencyCode", new Document("$arrayElemAt", Arrays.asList("$AverageSalesPerOrderItemCurrencyCode", 0)));
                                 salesByDate.put("averageSalesPerOrderItem", averageSalesPerOrderItem);
 
                                 Document averageSalesPerOrderItemB2B = new Document();
                                 averageSalesPerOrderItemB2B.put("amount", "$totalAverageSalesPerOrderItemB2B");
-                                averageSalesPerOrderItemB2B.put("currencyCode", CurrencyCode.USD);
+                                averageSalesPerOrderItemB2B.put("currencyCode", new Document("$arrayElemAt", Arrays.asList("$AverageSalesPerOrderItemB2BCurrencyCode", 0)));
                                 salesByDate.put("averageSalesPerOrderItemB2B", averageSalesPerOrderItemB2B);
 
                                 Document averageSellingPrice = new Document();
                                 averageSellingPrice.put("amount", "$totalAverageSellingPrice");
-                                averageSellingPrice.put("currencyCode", CurrencyCode.USD);
+                                averageSellingPrice.put("currencyCode", new Document("$arrayElemAt", Arrays.asList("$AverageSellingPriceCurrencyCode", 0)));
                                 salesByDate.put("averageSellingPrice", averageSellingPrice);
 
                                 Document averageSellingPriceB2B = new Document();
                                 averageSellingPriceB2B.put("amount", "$totalAverageSellingPriceB2B");
-                                averageSellingPriceB2B.put("currencyCode", CurrencyCode.USD);
-                                salesByDate.put("totalAverageSellingPriceB2B", averageSellingPriceB2B);
+                                averageSellingPriceB2B.put("currencyCode", new Document("$arrayElemAt", Arrays.asList("$AverageSellingPriceB2BCurrencyCode", 0)));
+                                salesByDate.put("averageSellingPriceB2B", averageSellingPriceB2B);
 
                                 Document claimsAmount = new Document();
                                 claimsAmount.put("amount", "$totalClaimsAmount");
-                                claimsAmount.put("currencyCode", CurrencyCode.USD);
+                                claimsAmount.put("currencyCode", new Document("$arrayElemAt", Arrays.asList("$ClaimsAmountCurrencyCode", 0)));
                                 salesByDate.put("claimsAmount", claimsAmount);
 
                                 Document shippedProductSales = new Document();
                                 shippedProductSales.put("amount", "$totalShippedProductSales");
-                                shippedProductSales.put("currencyCode", CurrencyCode.USD);
+                                shippedProductSales.put("currencyCode", new Document("$arrayElemAt", Arrays.asList("$ShippedProductSalesCurrencyCode", 0)));
                                 salesByDate.put("shippedProductSales", shippedProductSales);
                                 return salesByDate;
                             }
@@ -300,7 +309,7 @@ public class ReportService {
                         .and("averageParentItems", "$totalAverageParentItems")
                         .and("feedbackReceived", "$totalFeedbackReceived")
                         .and("negativeFeedbackReceived", "$totalNegativeFeedbackReceived")
-                        .and("receivedNegativeFeedbackRate", "$totalReceivedNegativeFeedbackRate"));
+                        .and("receivedNegativeFeedbackRate", "$totalFeedbackReceived / $totalNegativeFeedbackReceived"));
 
         TypedAggregation<SalesAndTrafficByDate> aggregation = Aggregation.newAggregation(
                 SalesAndTrafficByDate.class,
@@ -332,5 +341,19 @@ public class ReportService {
                 "salesAndTrafficByDate", SalesAndTrafficByDate.class);
 
         return results.getUniqueMappedResult();
+    }
+
+    private Pair<Date, Date> findEarliestAndLatestDate() {
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.group().min("date").as("startDate").max("date").as("endDate")
+        );
+
+        AggregationResults<Document> results = mongoTemplate.aggregate(aggregation, "salesAndTrafficByDate", Document.class);
+        Document aggregationResults = results.getUniqueMappedResult();
+
+        Date earliestDate = aggregationResults.getDate("startDate");
+        Date latestDate = aggregationResults.getDate("endDate");
+
+        return Pair.of(earliestDate, latestDate);
     }
 }
